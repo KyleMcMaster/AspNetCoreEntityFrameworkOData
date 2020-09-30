@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace AspNetCoreEntityFrameworkOData.Context
 {
@@ -9,7 +10,10 @@ namespace AspNetCoreEntityFrameworkOData.Context
             // this really should be somewhere else
             Database.EnsureCreated();
 
-            WeatherForecasts.AddRange(WeatherForecast.SeedWeatherForecasts());
+            if (!WeatherForecasts.Any())
+            {
+                WeatherForecasts.AddRange(WeatherForecast.SeedWeatherForecasts());
+            }
 
             SaveChanges();
         }
