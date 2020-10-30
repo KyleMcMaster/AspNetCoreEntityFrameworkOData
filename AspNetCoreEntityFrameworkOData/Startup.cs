@@ -1,13 +1,13 @@
 using AspNetCoreEntityFrameworkOData.Context;
-using Microsoft.AspNet.OData.Builder;
-using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OData.Edm;
+using Microsoft.OData.ModelBuilder;
 
 namespace AspNetCoreEntityFrameworkOData
 {
@@ -24,7 +24,18 @@ namespace AspNetCoreEntityFrameworkOData
 
             services.AddControllers();
 
-            services.AddOData();
+            services.AddRouting();
+
+            services.AddOData(opt => opt.AddModel("odata", GetEdmModel()).Filter().Select().SetMaxTop(100));
+
+            IEdmModel GetEdmModel()
+            {
+                ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+
+                builder.EntitySet<WeatherForecast>("WeatherForecasts");
+
+                return builder.GetEdmModel();
+            }
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -43,18 +54,8 @@ namespace AspNetCoreEntityFrameworkOData
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.Select().Expand().Filter().OrderBy().MaxTop(1000).Count();
-                endpoints.MapODataRoute("odata", "odata", GetEdmModel());
+                endpoints.MapControllers();
             });
-
-            IEdmModel GetEdmModel()
-            {
-                ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
-
-                builder.EntitySet<WeatherForecast>("WeatherForecasts");
-
-                return builder.GetEdmModel();
-            }
         }
     }
 }
